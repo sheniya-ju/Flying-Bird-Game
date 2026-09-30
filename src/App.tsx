@@ -442,6 +442,7 @@ function App() {
   const gameMusicRef = useRef<HTMLAudioElement | null>(null);
   const victorySoundRef = useRef<HTMLAudioElement | null>(null);
   const musicModeRef = useRef<"none" | "website" | "game">("none");
+  const [victoryPlaying, setVictoryPlaying] = useState(false);
 
   const [message, setMessage] = useState("");
 
@@ -463,7 +464,7 @@ function App() {
     victorySound.preload = "auto";
     websiteMusic.volume = 0.32;
     gameMusic.volume = 0.42;
-    victorySound.volume = 0.75;
+    victorySound.volume = 0.85;
 
     websiteMusicRef.current = websiteMusic;
     gameMusicRef.current = gameMusic;
@@ -495,7 +496,7 @@ function App() {
       !levelComplete;
 
     const shouldPlayWebsiteMusic =
-      Boolean(player) && !shouldPlayGameMusic;
+      Boolean(player) && !shouldPlayGameMusic && !victoryPlaying;
 
     if (!soundEnabled) {
       websiteMusic.pause();
@@ -533,7 +534,7 @@ function App() {
     websiteMusic.pause();
     gameMusic.pause();
     musicModeRef.current = "none";
-  }, [player, screen, gameOver, levelComplete, soundEnabled]);
+  }, [player, screen, gameOver, levelComplete, soundEnabled, victoryPlaying]);
 
   // Restore the signed-in session when the page is refreshed.
   useEffect(() => {
@@ -657,7 +658,8 @@ function App() {
         websiteMusicRef.current?.pause();
         gameMusicRef.current?.pause();
         victorySoundRef.current?.pause();
-        if (victorySoundRef.current) victorySoundRef.current.currentTime = 0;
+        victorySoundRef.current && (victorySoundRef.current.currentTime = 0);
+        setVictoryPlaying(false);
         musicModeRef.current = "none";
       }
 
@@ -766,7 +768,8 @@ function App() {
     websiteMusicRef.current?.pause();
     gameMusicRef.current?.pause();
     victorySoundRef.current?.pause();
-    if (victorySoundRef.current) victorySoundRef.current.currentTime = 0;
+    victorySoundRef.current && (victorySoundRef.current.currentTime = 0);
+    setVictoryPlaying(false);
     musicModeRef.current = "none";
 
     gameRef.current.running = false;
@@ -1003,6 +1006,7 @@ function App() {
 
   function finishLevel() {
     const game = gameRef.current;
+    playSound("complete");
 
     if (
       game.dead ||
@@ -1012,19 +1016,28 @@ function App() {
       return;
     }
 
-    // Play the dedicated victory MP3 once when the finish gate is reached.
-    if (soundEnabled && victorySoundRef.current) {
-      const victorySound = victorySoundRef.current;
-      victorySound.currentTime = 0;
-      void victorySound.play().catch(() => {
-        // Browsers may block audio; the game should still complete normally.
-      });
-    }
-
-    playSound("complete");
-
     game.running = false;
     game.dead = true;
+
+    // Play the dedicated victory sound first. Keep both background music tracks
+    // paused until the victory sound finishes, then resume the website music.
+    websiteMusicRef.current?.pause();
+    gameMusicRef.current?.pause();
+    musicModeRef.current = "none";
+
+    const victorySound = victorySoundRef.current;
+    if (soundEnabled && victorySound) {
+      setVictoryPlaying(true);
+      victorySound.currentTime = 0;
+      victorySound.onended = () => {
+        setVictoryPlaying(false);
+      };
+      void victorySound.play().catch(() => {
+        setVictoryPlaying(false);
+      });
+    } else {
+      setVictoryPlaying(false);
+    }
 
     setLevelComplete(true);
     setGameOver(false);
