@@ -1558,7 +1558,12 @@ img, canvas, video, svg {
   }
 }
 
-\n/* Leaderboard refresh controls */\n.leaderboard-actions { display: flex; align-items: center; gap: 10px; }\n.leaderboard-refresh-button { border: 1px solid rgba(255,255,255,.24); border-radius: 999px; padding: 8px 13px; background: rgba(255,255,255,.10); color: inherit; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .2s ease, transform .2s ease; }\n.leaderboard-refresh-button:hover:not(:disabled) { background: rgba(255,255,255,.18); transform: translateY(-1px); }\n.leaderboard-refresh-button:disabled { opacity: .55; cursor: not-allowed; }\n@media (max-width: 480px) { .api-leaderboard-heading { gap: 8px; flex-wrap: wrap; } .leaderboard-actions { flex-wrap: wrap; } .leaderboard-refresh-button { padding: 7px 10px; font-size: .75rem; } }\n
+/* Leaderboard refresh controls */
+.leaderboard-actions { display: flex; align-items: center; gap: 10px; }
+.leaderboard-refresh-button { border: 1px solid rgba(255,255,255,.24); border-radius: 999px; padding: 8px 13px; background: rgba(255,255,255,.10); color: inherit; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .2s ease, transform .2s ease; }
+.leaderboard-refresh-button:hover:not(:disabled) { background: rgba(255,255,255,.18); transform: translateY(-1px); }
+.leaderboard-refresh-button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 480px) { .api-leaderboard-heading { gap: 8px; flex-wrap: wrap; } .leaderboard-actions { flex-wrap: wrap; } .leaderboard-refresh-button { padding: 7px 10px; font-size: .75rem; } }
 
 /* Daily missions */
 .daily-mission { padding: 14px; margin: 12px 0; border: 1px solid var(--border-color, rgba(120,140,130,.25)); border-radius: 14px; background: rgba(120, 170, 140, .06); }
