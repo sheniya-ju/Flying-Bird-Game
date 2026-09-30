@@ -1,0 +1,65 @@
+.leaderboard {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-sizing: border-box;
+  color: #222;
+}
+
+.leaderboard h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f3f7f1;
+}
+
+.rank {
+  font-size: 18px;
+  font-weight: bold;
+  min-width: 35px;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.player-info small {
+  color: #777;
+}
+
+.player-score {
+  font-weight: bold;
+  color: #2e8b57;
+}
+
+@media (max-width: 480px) {
+  .leaderboard {
+    padding: 14px;
+  }
+
+  .leaderboard-row {
+    padding: 12px;
+    gap: 8px;
+  }
+}
