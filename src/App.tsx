@@ -2218,15 +2218,7 @@ function App() {
             </div>
           </div>
 
-          <div className="section-card engagement-card">
-            <h2>🌍 Local Leaderboard</h2>
-            <p className="muted">Rankings stored in this browser only. A Firebase backend is needed for a global leaderboard.</p>
-            <div className="leaderboard-list">
-              {Object.values(readPlayers()).sort((a,b)=>b.bestScore-a.bestScore).slice(0,10).map((entry,index)=>(
-                <div className="leaderboard-row" key={entry.username}><span>#{index+1}</span><strong>{entry.username}</strong><span>⭐ {entry.bestScore}</span><span>Level {entry.unlockedLevel}</span></div>
-              ))}
-            </div>
-          </div>
+          
 
           <div className="section-card">
             <h2>🏅 Rewards & Designs</h2>
