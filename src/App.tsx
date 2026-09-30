@@ -438,44 +438,71 @@ function App() {
 
   // Restore the signed-in session when the page is refreshed.
   useEffect(() => {
-    const token = localStorage.getItem("flyingBirdToken");
-    if (!token) return;
+  const storedToken = localStorage.getItem("flyingBirdToken");
 
-    let cancelled = false;
-    async function restoreSession() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) {
-          localStorage.removeItem("flyingBirdToken");
-          if (!cancelled) setAccessToken("");
-          return;
+  if (!storedToken) {
+    return;
+  }
+
+  const token: string = storedToken;
+
+  let cancelled = false;
+
+  async function restoreSession() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        localStorage.removeItem("flyingBirdToken");
+
+        if (!cancelled) {
+          setAccessToken("");
         }
 
-        const data = await response.json();
-        if (cancelled || !data?.username) return;
-
-        const existingPlayers = readPlayers();
-        const oldPlayer = existingPlayers[data.username.toLowerCase()];
-        const restoredPlayer: Player = {
-          ...makePlayer(data.username, ""),
-          ...oldPlayer,
-          username: data.username,
-          password: "",
-          totalGems: data.total_gems ?? oldPlayer?.totalGems ?? 0,
-        };
-        setPlayer(restoredPlayer);
-        setAccessToken(token);
-        setScreen("dashboard");
-      } catch (error) {
-        console.error("Could not restore login session:", error);
+        return;
       }
-    }
 
-    void restoreSession();
-    return () => { cancelled = true; };
-  }, []);
+      const data = await response.json();
+
+      if (cancelled || !data?.username) {
+        return;
+      }
+
+      const existingPlayers = readPlayers();
+      const oldPlayer =
+        existingPlayers[data.username.toLowerCase()];
+
+      const restoredPlayer: Player = {
+        ...makePlayer(data.username, ""),
+        ...oldPlayer,
+        username: data.username,
+        password: "",
+        totalGems:
+          data.total_gems ??
+          oldPlayer?.totalGems ??
+          0,
+      };
+
+      setPlayer(restoredPlayer);
+      setAccessToken(token);
+      setScreen("dashboard");
+    } catch (error) {
+      console.error(
+        "Could not restore login session:",
+        error
+      );
+    }
+  }
+
+  void restoreSession();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
+
   const [powerActive, setPowerActive] = useState(false);
   const [powerSeconds, setPowerSeconds] = useState(0);
   const [powerNotice, setPowerNotice] = useState("");
@@ -2635,7 +2662,7 @@ function App() {
                   Gems cannot buy designs or powers.
                 </p>
 
-                {player.totalGems >= REVIVE_COST && (
+                {player && player.totalGems >= REVIVE_COST && (
                   <button
                     className="primary-btn"
                     onClick={revive}
