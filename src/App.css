@@ -1788,3 +1788,115 @@ img, canvas, video, svg {
     width: 100%;
   }
 }
+/* =========================================================
+   MUSIC CONTROLS
+   Website music / Game music toggle
+   ========================================================= */
+
+.music-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  border-radius: 999px;
+  color: #f7f4ff;
+  background: rgba(30, 27, 75, 0.82);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.16);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.music-control:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.55),
+    rgba(37, 99, 235, 0.4)
+  );
+  border-color: #a78bfa;
+  transform: translateY(-2px);
+}
+
+.music-control:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.music-control.is-on {
+  color: #ffffff;
+  border-color: rgba(103, 232, 249, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(109, 40, 217, 0.58),
+    rgba(14, 165, 233, 0.38)
+  );
+  box-shadow:
+    0 0 0 2px rgba(103, 232, 249, 0.08),
+    0 7px 22px rgba(37, 99, 235, 0.22);
+}
+
+.music-control.is-off {
+  color: #aaa4ce;
+  background: rgba(15, 17, 48, 0.72);
+  border-color: rgba(148, 145, 180, 0.2);
+}
+
+.music-control-icon {
+  display: inline-grid;
+  place-items: center;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.music-control-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+/* If the button is placed inside the game controls */
+.game-music-control {
+  position: relative;
+  z-index: 10;
+}
+
+/* Compact controls on tablets and phones */
+@media (max-width: 768px) {
+  .music-control {
+    min-width: 40px;
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .music-control-label {
+    display: none;
+  }
+
+  .music-control-icon {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .music-control {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 7px 9px;
+  }
+
+  .music-control-icon {
+    font-size: 0.95rem;
+  }
+}
+
+/* Prevent controls from overflowing on very narrow screens */
+@media (max-width: 380px) {
+  .music-control {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px 8px;
+  }
+}

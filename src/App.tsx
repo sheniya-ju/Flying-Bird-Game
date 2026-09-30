@@ -46,6 +46,8 @@ type Gem = {
 
 const STORAGE_KEY = "flyingBirdPlayers";
 const SOUND_KEY = "flyingBirdSoundEnabled";
+const WEBSITE_MUSIC_SRC = "/sounds/website-music.mp3";
+const GAME_MUSIC_SRC = "/sounds/game-music.mp3";
 const MISSION_CLAIMS_KEY = "flyingBirdDailyMissionClaims";
 
 const WIDTH = 1000;
@@ -434,7 +436,95 @@ function App() {
   const gamePausedRef = useRef(false);
   const audioRef = useRef<AudioContext | null>(null);
 
+  // Two separate music tracks: one for the signed-in website and one for gameplay.
+  const websiteMusicRef = useRef<HTMLAudioElement | null>(null);
+  const gameMusicRef = useRef<HTMLAudioElement | null>(null);
+  const musicModeRef = useRef<"none" | "website" | "game">("none");
+
   const [message, setMessage] = useState("");
+
+  // ---------------------------------------------------------------------------
+  // BACKGROUND MUSIC
+  // Website music plays on every signed-in page. Gameplay music replaces it
+  // when a level starts, and website music immediately returns on game over
+  // or level completion. The tracks loop independently.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const websiteMusic = new Audio(WEBSITE_MUSIC_SRC);
+    const gameMusic = new Audio(GAME_MUSIC_SRC);
+
+    websiteMusic.loop = true;
+    gameMusic.loop = true;
+    websiteMusic.preload = "auto";
+    gameMusic.preload = "auto";
+    websiteMusic.volume = 0.32;
+    gameMusic.volume = 0.42;
+
+    websiteMusicRef.current = websiteMusic;
+    gameMusicRef.current = gameMusic;
+
+    return () => {
+      websiteMusic.pause();
+      gameMusic.pause();
+      websiteMusic.currentTime = 0;
+      gameMusic.currentTime = 0;
+      websiteMusicRef.current = null;
+      gameMusicRef.current = null;
+      musicModeRef.current = "none";
+    };
+  }, []);
+
+  useEffect(() => {
+    const websiteMusic = websiteMusicRef.current;
+    const gameMusic = gameMusicRef.current;
+    if (!websiteMusic || !gameMusic) return;
+
+    const shouldPlayGameMusic =
+      Boolean(player) &&
+      screen === "game" &&
+      !gameOver &&
+      !levelComplete;
+
+    const shouldPlayWebsiteMusic =
+      Boolean(player) && !shouldPlayGameMusic;
+
+    if (!soundEnabled) {
+      websiteMusic.pause();
+      gameMusic.pause();
+      musicModeRef.current = "none";
+      return;
+    }
+
+    if (shouldPlayGameMusic) {
+      if (musicModeRef.current !== "game") {
+        websiteMusic.pause();
+        gameMusic.currentTime = 0;
+        musicModeRef.current = "game";
+      }
+
+      void gameMusic.play().catch(() => {
+        // Browsers may block autoplay after a page refresh. The next user
+        // interaction (Play/Start) will try again.
+      });
+      return;
+    }
+
+    if (shouldPlayWebsiteMusic) {
+      if (musicModeRef.current !== "website") {
+        gameMusic.pause();
+        musicModeRef.current = "website";
+      }
+
+      void websiteMusic.play().catch(() => {
+        // A browser may require a user gesture before audio can start.
+      });
+      return;
+    }
+
+    websiteMusic.pause();
+    gameMusic.pause();
+    musicModeRef.current = "none";
+  }, [player, screen, gameOver, levelComplete, soundEnabled]);
 
   // Restore the signed-in session when the page is refreshed.
   useEffect(() => {
@@ -553,9 +643,18 @@ function App() {
     setSoundEnabled((enabled) => {
       const next = !enabled;
       localStorage.setItem(SOUND_KEY, String(next));
+
+      if (!next) {
+        websiteMusicRef.current?.pause();
+        gameMusicRef.current?.pause();
+        musicModeRef.current = "none";
+      }
+
       return next;
     });
-    playSound("click");
+
+    // Do not play a click when the user is muting the sound. When unmuting,
+    // the music effect above starts the correct track for the current screen.
   }
 
   function togglePause() {
@@ -653,6 +752,9 @@ function App() {
   function logout() {
     stopTimer();
     stopGameAnimation();
+    websiteMusicRef.current?.pause();
+    gameMusicRef.current?.pause();
+    musicModeRef.current = "none";
 
     gameRef.current.running = false;
     gameRef.current.dead = true;
@@ -1932,6 +2034,15 @@ function App() {
 
             <button
               className="outline-btn"
+              type="button"
+              onClick={toggleSound}
+              aria-label={soundEnabled ? "Turn music off" : "Turn music on"}
+            >
+              {soundEnabled ? "🔊 Music" : "🔇 Music"}
+            </button>
+
+            <button
+              className="outline-btn"
               onClick={logout}
             >
               Logout
@@ -2560,7 +2671,7 @@ function App() {
                 {gamePaused ? "▶ Resume" : "⏸ Pause"}
               </button>
               <button type="button" className="game-control-btn" onClick={toggleSound}>
-                {soundEnabled ? "🔊 Sound" : "🔇 Muted"}
+                {soundEnabled ? "🔊 Music On" : "🔇 Music Off"}
               </button>
             </div>
           </div>
